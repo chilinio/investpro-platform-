@@ -7,13 +7,29 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const app = express();
 
-// CORS for Vercel frontend
+// CORS for Vercel frontend - allow all Vercel preview URLs
 app.use(cors({
-  origin: [
-    process.env.FRONTEND_URL || 'http://localhost:5173',
-    'https://invest-eight-kappa.vercel.app',
-    'https://invest.vercel.app'
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Allow localhost for development
+    if (origin === 'http://localhost:5173' || origin === 'http://localhost:3000') {
+      return callback(null, true);
+    }
+    
+    // Allow any Vercel domain
+    if (origin.includes('vercel.app')) {
+      return callback(null, true);
+    }
+    
+    // Allow the specific frontend URL from environment variable
+    if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
+      return callback(null, true);
+    }
+    
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
 }));
 app.use(express.json());
