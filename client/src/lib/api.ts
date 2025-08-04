@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://invest-k79xgdhaq-paddys-projects-0a00fd55.vercel.app/api';
+// Force the API URL to use the Vercel backend
+const API_BASE_URL = 'https://invest-k79xgdhaq-paddys-projects-0a00fd55.vercel.app/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
