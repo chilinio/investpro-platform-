@@ -46,11 +46,7 @@ const InvestmentStats: React.FC = () => {
   }
 
   if (error) {
-    return (
-      <div className="text-center py-4">
-        <div className="text-red-600">{error}</div>
-      </div>
-    );
+    return null;
   }
 
   if (!stats) {

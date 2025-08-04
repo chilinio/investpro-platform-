@@ -8,6 +8,7 @@ import Dashboard from './components/Dashboard';
 import InvestmentPackages from './components/InvestmentPackages';
 import NotificationToast from './components/NotificationToast';
 import Footer from './components/Footer';
+import Payment from './pages/Payment';
 
 // Protected Route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -120,6 +121,7 @@ const App: React.FC = () => {
                     </ProtectedRoute>
                   }
                 />
+                <Route path="/payment" element={<Payment />} />
                 <Route path="/" element={<Navigate to="/dashboard" />} />
               </Routes>
             </main>

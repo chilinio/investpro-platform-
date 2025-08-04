@@ -79,9 +79,19 @@ const InvestmentPackages: React.FC = () => {
       });
       reset();
       setSelectedPackage(null);
-      // Redirect to dashboard after 2 seconds
+      // Redirect to payment page after 2 seconds
       setTimeout(() => {
-        navigate('/dashboard');
+        navigate('/payment', { 
+          state: { 
+            investment: {
+              amount: parseFloat(formData.amount),
+              packageName: selectedPackage?.name,
+              packageId: selectedPackage?.id,
+              dailyReturn: selectedPackage ? (parseFloat(formData.amount) * selectedPackage.dailyReturn / 100) : 0,
+              totalReturn: selectedPackage ? (parseFloat(formData.amount) * selectedPackage.dailyReturn / 100 * selectedPackage.duration) : 0
+            }
+          }
+        });
       }, 2000);
     } catch (err: any) {
       addNotification({
