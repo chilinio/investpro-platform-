@@ -9,7 +9,11 @@ const app = express();
 
 // CORS for Vercel frontend
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: [
+    process.env.FRONTEND_URL || 'http://localhost:5173',
+    'https://invest-eight-kappa.vercel.app',
+    'https://invest.vercel.app'
+  ],
   credentials: true,
 }));
 app.use(express.json());
