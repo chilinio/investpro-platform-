@@ -12,7 +12,8 @@
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:setup": "ts-node src/db/setup.ts"
+    "db:setup": "ts-node src/db/setup.ts",
+    "db:fix-users": "ts-node src/db/fix-users-table.ts"
   },
   "keywords": [],
   "author": "",
