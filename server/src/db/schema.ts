@@ -7,8 +7,8 @@ export const users = pgTable('users', {
   lastName: varchar('last_name', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).notNull().unique(),
   password: text('password').notNull(),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow()
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
 })
 
 export const investmentPackages = pgTable('investment_packages', {
@@ -18,8 +18,8 @@ export const investmentPackages = pgTable('investment_packages', {
   dailyInterestRate: decimal('daily_interest_rate', { precision: 5, scale: 2 }).notNull(),
   duration: integer('duration').notNull(),
   description: text('description'),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow()
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
 })
 
 export const investments = pgTable('investments', {
@@ -28,10 +28,10 @@ export const investments = pgTable('investments', {
   packageId: integer('package_id').notNull().references(() => investmentPackages.id),
   amount: decimal('amount', { precision: 10, scale: 2 }).notNull(),
   status: varchar('status', { length: 50 }).notNull().default('active'),
-  startDate: timestamp('start_date').defaultNow(),
-  endDate: timestamp('end_date'),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow()
+  startDate: timestamp('start_date', { withTimezone: true }).defaultNow(),
+  endDate: timestamp('end_date', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
 })
 
 export const transactions = pgTable('transactions', {
@@ -41,8 +41,8 @@ export const transactions = pgTable('transactions', {
   type: varchar('type', { length: 50 }).notNull(),
   amount: decimal('amount', { precision: 10, scale: 2 }).notNull(),
   status: varchar('status', { length: 50 }).notNull().default('pending'),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow()
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
 })
 
 // Define relations

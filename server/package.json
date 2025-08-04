@@ -11,7 +11,8 @@
     "migrate": "ts-node src/db/migrate.ts",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "db:setup": "ts-node src/db/setup.ts"
   },
   "keywords": [],
   "author": "",
