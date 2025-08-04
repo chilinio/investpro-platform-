@@ -32,7 +32,10 @@ const LoginForm: React.FC = () => {
   const onSubmit = async (formData: LoginFormData) => {
     try {
       const response = await api.post('/auth/login', formData);
-      const user = response.data;
+      const { user, token } = response.data;
+      
+      // Store the token
+      localStorage.setItem('token', token);
       
       // Create user object for auth context
       const userData = {

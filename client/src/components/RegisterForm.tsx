@@ -57,7 +57,10 @@ const RegisterForm: React.FC = () => {
       
       console.log('Registration response:', response.data);
       
-      const user = response.data;
+      const { user, token } = response.data;
+      
+      // Store the token
+      localStorage.setItem('token', token);
       
       // Create user object for auth context
       const userData = {

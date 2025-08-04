@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CORS Test</title>
+</head>
+<body>
+    <h1>CORS Test for InvestPro API</h1>
+    <button onclick="testHealth()">Test Health Endpoint</button>
+    <button onclick="testRegister()">Test Registration</button>
+    <div id="result"></div>
+
+    <script>
+        async function testHealth() {
+            try {
+                const response = await fetch('https://invest-k79xgdhaq-paddys-projects-0a00fd55.vercel.app/api/health');
+                const data = await response.json();
+                document.getElementById('result').innerHTML = `<pre>✅ Health Check Success: ${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `<pre>❌ Health Check Failed: ${error.message}</pre>`;
+            }
+        }
+
+        async function testRegister() {
+            try {
+                const response = await fetch('https://invest-k79xgdhaq-paddys-projects-0a00fd55.vercel.app/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        firstName: 'Test',
+                        lastName: 'User',
+                        email: 'test' + Date.now() + '@example.com',
+                        password: 'password123'
+                    })
+                });
+                const data = await response.json();
+                document.getElementById('result').innerHTML = `<pre>✅ Registration Test: ${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `<pre>❌ Registration Failed: ${error.message}</pre>`;
+            }
+        }
+    </script>
+</body>
+</html> 
