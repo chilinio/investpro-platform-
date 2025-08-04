@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import session from 'express-session';
 import dotenv from 'dotenv';
-import mongoose from 'mongoose';
 import authRouter from './routes/auth'; // Import the auth router
 import investmentRouter from './routes/investments';
 import contactRoutes from './routes/contact';
@@ -10,22 +9,26 @@ import { errorHandler } from './middleware/errorHandler';
 import helmet from 'helmet';
 import { db } from './db';
 import { investmentPackages } from './db/schema';
+import { sql } from 'drizzle-orm';
 
 dotenv.config();
 
-// MongoDB connection with error handling
-const connectDB = async () => {
+// PostgreSQL connection check
+const checkDBConnection = async () => {
   try {
-    // Use local MongoDB instance
-    await mongoose.connect('mongodb://127.0.0.1:27017/investpro');
-    console.log('Connected to MongoDB');
+    // Test the database connection
+    await db.execute(sql`SELECT 1`);
+    console.log('Connected to PostgreSQL');
   } catch (error) {
-    console.error('MongoDB connection error:', error);
-    process.exit(1); // Exit if we can't connect to the database
+    console.error('PostgreSQL connection error:', error);
+    // Don't exit in production, just log the error
+    if (process.env.NODE_ENV === 'development') {
+      process.exit(1);
+    }
   }
 };
 
-connectDB();
+checkDBConnection();
 
 // Extend session type
 declare module 'express-session' {
@@ -103,12 +106,22 @@ app.get('/', (req, res) => {
   res.redirect('/api/health');
 });
 
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'ok',
-    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-    environment: process.env.NODE_ENV || 'development'
-  });
+app.get('/api/health', async (req, res) => {
+  try {
+    await db.execute(sql`SELECT 1`);
+    res.json({ 
+      status: 'ok',
+      database: 'connected',
+      environment: process.env.NODE_ENV || 'development'
+    });
+  } catch (error) {
+    res.json({ 
+      status: 'error',
+      database: 'disconnected',
+      environment: process.env.NODE_ENV || 'development',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
 });
 
 // Investment routes

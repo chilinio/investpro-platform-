@@ -11,7 +11,8 @@
     "build:server": "cd server && npm install && npm run build",
     "db:push": "cd server && npm run db:push",
     "db:studio": "cd server && npm run db:studio",
-    "db:generate": "cd server && npm run db:generate"
+    "db:generate": "cd server && npm run db:generate",
+    "db:setup": "cd server && npm run db:push && npm run seed"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
