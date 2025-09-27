@@ -3,266 +3,302 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InvestPro Platform Test</title>
+    <title>InvestPro Browser Test</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
-        .success { background-color: #d4edda; border-color: #c3e6cb; }
-        .error { background-color: #f8d7da; border-color: #f5c6cb; }
-        .loading { background-color: #fff3cd; border-color: #ffeaa7; }
-        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
-        input { padding: 8px; margin: 5px; width: 200px; }
-        .result { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 3px; }
+        .success { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .info { background: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; width: 200px; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        .status { font-weight: bold; }
     </style>
 </head>
 <body>
-    <h1>🚀 InvestPro Platform Test Suite</h1>
-    <p>This page tests the complete InvestPro platform functionality.</p>
+    <div class="container">
+        <h1>🚀 InvestPro Browser Test Suite</h1>
+        <p>Testing the complete platform functionality through the browser</p>
 
-    <div id="status" class="test-section loading">
-        <h3>🔄 Initializing Tests...</h3>
-        <p>Checking server connectivity...</p>
-    </div>
-
-    <div class="test-section">
-        <h3>1️⃣ Server Health Check</h3>
-        <button onclick="testHealth()">Test Health</button>
-        <div id="health-result" class="result"></div>
-    </div>
-
-    <div class="test-section">
-        <h3>2️⃣ Investment Packages</h3>
-        <button onclick="testPackages()">Get Packages</button>
-        <div id="packages-result" class="result"></div>
-    </div>
-
-    <div class="test-section">
-        <h3>3️⃣ User Registration</h3>
-        <div>
-            <input type="text" id="firstName" placeholder="First Name" value="John">
-            <input type="text" id="lastName" placeholder="Last Name" value="Doe">
+        <!-- Registration Test -->
+        <div class="test-section">
+            <h3>👤 User Registration Test</h3>
+            <div>
+                <input type="text" id="firstName" placeholder="First Name" value="Browser">
+                <input type="text" id="lastName" placeholder="Last Name" value="Test">
+            </div>
+            <div>
+                <input type="email" id="email" placeholder="Email" value="">
+                <input type="password" id="password" placeholder="Password" value="BrowserTest123!">
+            </div>
+            <button onclick="testRegistration()">🔐 Test Registration</button>
+            <div id="registerResult"></div>
         </div>
-        <div>
-            <input type="email" id="email" placeholder="Email" value="">
-            <input type="password" id="password" placeholder="Password" value="Password123!">
+
+        <!-- Login Test -->
+        <div class="test-section">
+            <h3>🔑 User Login Test</h3>
+            <div>
+                <input type="email" id="loginEmail" placeholder="Email">
+                <input type="password" id="loginPassword" placeholder="Password" value="BrowserTest123!">
+            </div>
+            <button onclick="testLogin()">🚪 Test Login</button>
+            <div id="loginResult"></div>
         </div>
-        <button onclick="testRegistration()">Register User</button>
-        <div id="register-result" class="result"></div>
-    </div>
 
-    <div class="test-section">
-        <h3>4️⃣ User Login</h3>
-        <button onclick="testLogin()">Login User</button>
-        <div id="login-result" class="result"></div>
-    </div>
+        <!-- Dashboard Test -->
+        <div class="test-section">
+            <h3>📊 Dashboard Test</h3>
+            <button onclick="testDashboard()">📈 Test Dashboard Data</button>
+            <div id="dashboardResult"></div>
+        </div>
 
-    <div class="test-section">
-        <h3>5️⃣ Authenticated Operations</h3>
-        <button onclick="testInvestments()">Get Investments</button>
-        <button onclick="testStats()">Get Stats</button>
-        <button onclick="testWallet()">Get Wallet</button>
-        <div id="auth-result" class="result"></div>
-    </div>
+        <!-- Investment Packages Test -->
+        <div class="test-section">
+            <h3>💼 Investment Packages Test</h3>
+            <button onclick="testPackages()">📦 Test Packages</button>
+            <div id="packagesResult"></div>
+        </div>
 
-    <div class="test-section">
-        <h3>6️⃣ Create Investment</h3>
-        <button onclick="testCreateInvestment()">Create Investment</button>
-        <div id="investment-result" class="result"></div>
-    </div>
+        <!-- Full Flow Test -->
+        <div class="test-section">
+            <h3>🎯 Complete Flow Test</h3>
+            <button onclick="runCompleteFlow()">🚀 Run Complete Test</button>
+            <div id="completeResult"></div>
+        </div>
 
-    <div class="test-section">
-        <h3>7️⃣ Payment System</h3>
-        <button onclick="testDeposit()">Test Deposit</button>
-        <div id="payment-result" class="result"></div>
-    </div>
-
-    <div class="test-section">
-        <h3>🎯 Test Results Summary</h3>
-        <div id="summary" class="result"></div>
+        <!-- System Status -->
+        <div class="test-section info">
+            <h3>🔧 System Status</h3>
+            <p><strong>Frontend:</strong> <span id="frontendStatus">Checking...</span></p>
+            <p><strong>Backend:</strong> <span id="backendStatus">Checking...</span></p>
+            <p><strong>Database:</strong> <span id="databaseStatus">Checking...</span></p>
+            <button onclick="checkSystemStatus()">🔄 Refresh Status</button>
+        </div>
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:5000/api';
-        let testResults = { passed: 0, failed: 0, total: 0 };
-        let currentUser = null;
-        let availablePackages = [];
-
+        // API Configuration
+        const API_BASE = '/api'; // Using Vite proxy
+        
         // Generate unique email for testing
-        document.getElementById('email').value = `test${Date.now()}@investpro.com`;
-
-        async function apiCall(endpoint, method = 'GET', data = null) {
-            const options = {
-                method,
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            };
-            
-            if (data) {
-                options.body = JSON.stringify(data);
-            }
-
-            const response = await fetch(`${API_BASE}${endpoint}`, options);
-            const result = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(result.error || `HTTP ${response.status}`);
-            }
-            
-            return result;
+        function generateTestEmail() {
+            return `browsertest${Date.now()}@test.com`;
         }
 
-        function updateResult(elementId, success, message, data = null) {
+        // Utility function to display results
+        function showResult(elementId, success, message, data = null) {
             const element = document.getElementById(elementId);
             element.className = `result ${success ? 'success' : 'error'}`;
             element.innerHTML = `
-                <strong>${success ? '✅ SUCCESS' : '❌ FAILED'}:</strong> ${message}
+                <div class="status">${success ? '✅ SUCCESS' : '❌ FAILED'}</div>
+                <div>${message}</div>
                 ${data ? `<pre>${JSON.stringify(data, null, 2)}</pre>` : ''}
             `;
-            
-            testResults.total++;
-            if (success) testResults.passed++;
-            else testResults.failed++;
-            
-            updateSummary();
         }
 
-        function updateSummary() {
-            const successRate = testResults.total > 0 ? 
-                ((testResults.passed / testResults.total) * 100).toFixed(1) : 0;
-            
-            document.getElementById('summary').innerHTML = `
-                <h4>📊 Results: ${testResults.passed}/${testResults.total} passed (${successRate}%)</h4>
-                <p><strong>✅ Passed:</strong> ${testResults.passed}</p>
-                <p><strong>❌ Failed:</strong> ${testResults.failed}</p>
-                <p><strong>🎯 Status:</strong> ${successRate >= 80 ? '🟢 Excellent' : successRate >= 60 ? '🟡 Good' : '🔴 Needs Work'}</p>
-            `;
-        }
+        // Test Registration
+        async function testRegistration() {
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value || generateTestEmail();
+            const password = document.getElementById('password').value;
 
-        async function testHealth() {
+            // Update email field with generated email
+            document.getElementById('email').value = email;
+            document.getElementById('loginEmail').value = email;
+
             try {
-                const result = await apiCall('/health');
-                updateResult('health-result', true, 'Server is healthy', result);
-                
-                // Update status
-                document.getElementById('status').className = 'test-section success';
-                document.getElementById('status').innerHTML = '<h3>✅ Server Online</h3><p>Ready for testing!</p>';
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ firstName, lastName, email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResult('registerResult', true, `Registration successful! User ID: ${data.user.id}`, data);
+                } else {
+                    showResult('registerResult', false, `Registration failed: ${data.error || 'Unknown error'}`, data);
+                }
             } catch (error) {
-                updateResult('health-result', false, error.message);
+                showResult('registerResult', false, `Network error: ${error.message}`);
             }
         }
 
+        // Test Login
+        async function testLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResult('loginResult', true, `Login successful! Welcome ${data.user.firstName}`, data);
+                } else {
+                    showResult('loginResult', false, `Login failed: ${data.error || 'Unknown error'}`, data);
+                }
+            } catch (error) {
+                showResult('loginResult', false, `Network error: ${error.message}`);
+            }
+        }
+
+        // Test Dashboard
+        async function testDashboard() {
+            try {
+                // Test investments endpoint
+                const investmentsResponse = await fetch(`${API_BASE}/investments`, {
+                    credentials: 'include'
+                });
+
+                if (investmentsResponse.status === 401) {
+                    showResult('dashboardResult', false, 'Please login first to test dashboard');
+                    return;
+                }
+
+                const investmentsData = await investmentsResponse.json();
+
+                // Test stats endpoint
+                const statsResponse = await fetch(`${API_BASE}/investments/stats`, {
+                    credentials: 'include'
+                });
+                const statsData = await statsResponse.json();
+
+                if (investmentsResponse.ok && statsResponse.ok) {
+                    showResult('dashboardResult', true, 
+                        `Dashboard data loaded! ${investmentsData.investments.length} investments, $${statsData.summary.totalInvestment} total`,
+                        { investments: investmentsData, stats: statsData });
+                } else {
+                    showResult('dashboardResult', false, 'Dashboard data failed to load');
+                }
+            } catch (error) {
+                showResult('dashboardResult', false, `Network error: ${error.message}`);
+            }
+        }
+
+        // Test Investment Packages
         async function testPackages() {
             try {
-                const result = await apiCall('/investments/packages');
-                availablePackages = result.packages;
-                updateResult('packages-result', true, `Found ${result.packages.length} packages`, result.packages);
+                const response = await fetch(`${API_BASE}/investments/packages`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResult('packagesResult', true, 
+                        `${data.packages.length} investment packages loaded`, data);
+                } else {
+                    showResult('packagesResult', false, 'Failed to load packages');
+                }
             } catch (error) {
-                updateResult('packages-result', false, error.message);
+                showResult('packagesResult', false, `Network error: ${error.message}`);
             }
         }
 
-        async function testRegistration() {
+        // Run Complete Flow
+        async function runCompleteFlow() {
+            const resultElement = document.getElementById('completeResult');
+            resultElement.innerHTML = '<div class="info">🚀 Running complete flow test...</div>';
+
+            const results = [];
+            
+            // Step 1: Register
             try {
-                const userData = {
-                    firstName: document.getElementById('firstName').value,
-                    lastName: document.getElementById('lastName').value,
-                    email: document.getElementById('email').value,
-                    password: document.getElementById('password').value
-                };
-
-                const result = await apiCall('/auth/register', 'POST', userData);
-                currentUser = userData;
-                updateResult('register-result', true, 'User registered successfully', result.user);
-            } catch (error) {
-                updateResult('register-result', false, error.message);
-            }
-        }
-
-        async function testLogin() {
-            if (!currentUser) {
-                updateResult('login-result', false, 'Please register a user first');
-                return;
-            }
-
-            try {
-                const result = await apiCall('/auth/login', 'POST', {
-                    email: currentUser.email,
-                    password: currentUser.password
+                const email = generateTestEmail();
+                const registerResponse = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        firstName: 'Flow',
+                        lastName: 'Test',
+                        email,
+                        password: 'FlowTest123!'
+                    })
                 });
-                updateResult('login-result', true, 'Login successful', result.user);
+                const registerData = await registerResponse.json();
+                results.push({ step: 'Registration', success: registerResponse.ok, data: registerData });
+
+                if (registerResponse.ok) {
+                    // Step 2: Login
+                    const loginResponse = await fetch(`${API_BASE}/auth/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ email, password: 'FlowTest123!' })
+                    });
+                    const loginData = await loginResponse.json();
+                    results.push({ step: 'Login', success: loginResponse.ok, data: loginData });
+
+                    if (loginResponse.ok) {
+                        // Step 3: Dashboard
+                        const dashResponse = await fetch(`${API_BASE}/investments`, { credentials: 'include' });
+                        const dashData = await dashResponse.json();
+                        results.push({ step: 'Dashboard', success: dashResponse.ok, data: dashData });
+
+                        // Step 4: Stats
+                        const statsResponse = await fetch(`${API_BASE}/investments/stats`, { credentials: 'include' });
+                        const statsData = await statsResponse.json();
+                        results.push({ step: 'Stats', success: statsResponse.ok, data: statsData });
+                    }
+                }
             } catch (error) {
-                updateResult('login-result', false, error.message);
+                results.push({ step: 'Error', success: false, error: error.message });
             }
+
+            const successCount = results.filter(r => r.success).length;
+            const totalCount = results.length;
+            
+            showResult('completeResult', successCount === totalCount, 
+                `Complete flow test: ${successCount}/${totalCount} steps passed`, results);
         }
 
-        async function testInvestments() {
+        // Check System Status
+        async function checkSystemStatus() {
+            // Frontend status
             try {
-                const investments = await apiCall('/investments');
-                const stats = await apiCall('/investments/stats');
-                
-                updateResult('auth-result', true, 
-                    `Authenticated endpoints working. Investments: ${investments.investments.length}`, 
-                    { investments: investments.investments.length, stats: stats.summary });
-            } catch (error) {
-                updateResult('auth-result', false, error.message);
+                const frontendResponse = await fetch('/');
+                document.getElementById('frontendStatus').innerHTML = 
+                    frontendResponse.ok ? '🟢 Online' : '🔴 Offline';
+            } catch {
+                document.getElementById('frontendStatus').innerHTML = '🔴 Offline';
             }
-        }
 
-        async function testStats() {
+            // Backend status
             try {
-                const result = await apiCall('/investments/stats');
-                updateResult('auth-result', true, 'Statistics retrieved', result.summary);
-            } catch (error) {
-                updateResult('auth-result', false, error.message);
+                const backendResponse = await fetch(`${API_BASE}/health`);
+                const backendData = await backendResponse.json();
+                document.getElementById('backendStatus').innerHTML = 
+                    backendResponse.ok ? `🟢 Online (${backendData.environment})` : '🔴 Offline';
+                document.getElementById('databaseStatus').innerHTML = 
+                    backendData.database === 'connected' ? '🟢 Connected' : '🔴 Disconnected';
+            } catch {
+                document.getElementById('backendStatus').innerHTML = '🔴 Offline';
+                document.getElementById('databaseStatus').innerHTML = '🔴 Unknown';
             }
         }
 
-        async function testWallet() {
-            try {
-                const result = await apiCall('/payments/wallet');
-                updateResult('auth-result', true, `Wallet balance: $${result.balance}`, result);
-            } catch (error) {
-                updateResult('auth-result', false, error.message);
-            }
-        }
-
-        async function testCreateInvestment() {
-            if (availablePackages.length === 0) {
-                updateResult('investment-result', false, 'Please load packages first');
-                return;
-            }
-
-            try {
-                const package = availablePackages[0];
-                const result = await apiCall('/investments', 'POST', {
-                    packageId: package.id,
-                    amount: package.minInvestment
-                });
-                updateResult('investment-result', true, 
-                    `Investment created: $${package.minInvestment} in ${package.name}`, result);
-            } catch (error) {
-                updateResult('investment-result', false, error.message);
-            }
-        }
-
-        async function testDeposit() {
-            try {
-                const result = await apiCall('/payments/deposit', 'POST', {
-                    amount: 1000,
-                    paymentMethod: 'card'
-                });
-                updateResult('payment-result', true, 'Deposit successful', result);
-            } catch (error) {
-                updateResult('payment-result', false, error.message);
-            }
-        }
-
-        // Auto-run initial tests
-        window.onload = async function() {
-            await testHealth();
-            await testPackages();
+        // Initialize on page load
+        window.onload = function() {
+            checkSystemStatus();
+            // Generate initial test email
+            document.getElementById('email').value = generateTestEmail();
         };
     </script>
 </body>
