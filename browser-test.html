@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InvestPro Platform Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .loading { background-color: #fff3cd; border-color: #ffeaa7; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        input { padding: 8px; margin: 5px; width: 200px; }
+        .result { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>🚀 InvestPro Platform Test Suite</h1>
+    <p>This page tests the complete InvestPro platform functionality.</p>
+
+    <div id="status" class="test-section loading">
+        <h3>🔄 Initializing Tests...</h3>
+        <p>Checking server connectivity...</p>
+    </div>
+
+    <div class="test-section">
+        <h3>1️⃣ Server Health Check</h3>
+        <button onclick="testHealth()">Test Health</button>
+        <div id="health-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2️⃣ Investment Packages</h3>
+        <button onclick="testPackages()">Get Packages</button>
+        <div id="packages-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3️⃣ User Registration</h3>
+        <div>
+            <input type="text" id="firstName" placeholder="First Name" value="John">
+            <input type="text" id="lastName" placeholder="Last Name" value="Doe">
+        </div>
+        <div>
+            <input type="email" id="email" placeholder="Email" value="">
+            <input type="password" id="password" placeholder="Password" value="Password123!">
+        </div>
+        <button onclick="testRegistration()">Register User</button>
+        <div id="register-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>4️⃣ User Login</h3>
+        <button onclick="testLogin()">Login User</button>
+        <div id="login-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>5️⃣ Authenticated Operations</h3>
+        <button onclick="testInvestments()">Get Investments</button>
+        <button onclick="testStats()">Get Stats</button>
+        <button onclick="testWallet()">Get Wallet</button>
+        <div id="auth-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>6️⃣ Create Investment</h3>
+        <button onclick="testCreateInvestment()">Create Investment</button>
+        <div id="investment-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>7️⃣ Payment System</h3>
+        <button onclick="testDeposit()">Test Deposit</button>
+        <div id="payment-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>🎯 Test Results Summary</h3>
+        <div id="summary" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        let testResults = { passed: 0, failed: 0, total: 0 };
+        let currentUser = null;
+        let availablePackages = [];
+
+        // Generate unique email for testing
+        document.getElementById('email').value = `test${Date.now()}@investpro.com`;
+
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            const options = {
+                method,
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+
+            const response = await fetch(`${API_BASE}${endpoint}`, options);
+            const result = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(result.error || `HTTP ${response.status}`);
+            }
+            
+            return result;
+        }
+
+        function updateResult(elementId, success, message, data = null) {
+            const element = document.getElementById(elementId);
+            element.className = `result ${success ? 'success' : 'error'}`;
+            element.innerHTML = `
+                <strong>${success ? '✅ SUCCESS' : '❌ FAILED'}:</strong> ${message}
+                ${data ? `<pre>${JSON.stringify(data, null, 2)}</pre>` : ''}
+            `;
+            
+            testResults.total++;
+            if (success) testResults.passed++;
+            else testResults.failed++;
+            
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const successRate = testResults.total > 0 ? 
+                ((testResults.passed / testResults.total) * 100).toFixed(1) : 0;
+            
+            document.getElementById('summary').innerHTML = `
+                <h4>📊 Results: ${testResults.passed}/${testResults.total} passed (${successRate}%)</h4>
+                <p><strong>✅ Passed:</strong> ${testResults.passed}</p>
+                <p><strong>❌ Failed:</strong> ${testResults.failed}</p>
+                <p><strong>🎯 Status:</strong> ${successRate >= 80 ? '🟢 Excellent' : successRate >= 60 ? '🟡 Good' : '🔴 Needs Work'}</p>
+            `;
+        }
+
+        async function testHealth() {
+            try {
+                const result = await apiCall('/health');
+                updateResult('health-result', true, 'Server is healthy', result);
+                
+                // Update status
+                document.getElementById('status').className = 'test-section success';
+                document.getElementById('status').innerHTML = '<h3>✅ Server Online</h3><p>Ready for testing!</p>';
+            } catch (error) {
+                updateResult('health-result', false, error.message);
+            }
+        }
+
+        async function testPackages() {
+            try {
+                const result = await apiCall('/investments/packages');
+                availablePackages = result.packages;
+                updateResult('packages-result', true, `Found ${result.packages.length} packages`, result.packages);
+            } catch (error) {
+                updateResult('packages-result', false, error.message);
+            }
+        }
+
+        async function testRegistration() {
+            try {
+                const userData = {
+                    firstName: document.getElementById('firstName').value,
+                    lastName: document.getElementById('lastName').value,
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value
+                };
+
+                const result = await apiCall('/auth/register', 'POST', userData);
+                currentUser = userData;
+                updateResult('register-result', true, 'User registered successfully', result.user);
+            } catch (error) {
+                updateResult('register-result', false, error.message);
+            }
+        }
+
+        async function testLogin() {
+            if (!currentUser) {
+                updateResult('login-result', false, 'Please register a user first');
+                return;
+            }
+
+            try {
+                const result = await apiCall('/auth/login', 'POST', {
+                    email: currentUser.email,
+                    password: currentUser.password
+                });
+                updateResult('login-result', true, 'Login successful', result.user);
+            } catch (error) {
+                updateResult('login-result', false, error.message);
+            }
+        }
+
+        async function testInvestments() {
+            try {
+                const investments = await apiCall('/investments');
+                const stats = await apiCall('/investments/stats');
+                
+                updateResult('auth-result', true, 
+                    `Authenticated endpoints working. Investments: ${investments.investments.length}`, 
+                    { investments: investments.investments.length, stats: stats.summary });
+            } catch (error) {
+                updateResult('auth-result', false, error.message);
+            }
+        }
+
+        async function testStats() {
+            try {
+                const result = await apiCall('/investments/stats');
+                updateResult('auth-result', true, 'Statistics retrieved', result.summary);
+            } catch (error) {
+                updateResult('auth-result', false, error.message);
+            }
+        }
+
+        async function testWallet() {
+            try {
+                const result = await apiCall('/payments/wallet');
+                updateResult('auth-result', true, `Wallet balance: $${result.balance}`, result);
+            } catch (error) {
+                updateResult('auth-result', false, error.message);
+            }
+        }
+
+        async function testCreateInvestment() {
+            if (availablePackages.length === 0) {
+                updateResult('investment-result', false, 'Please load packages first');
+                return;
+            }
+
+            try {
+                const package = availablePackages[0];
+                const result = await apiCall('/investments', 'POST', {
+                    packageId: package.id,
+                    amount: package.minInvestment
+                });
+                updateResult('investment-result', true, 
+                    `Investment created: $${package.minInvestment} in ${package.name}`, result);
+            } catch (error) {
+                updateResult('investment-result', false, error.message);
+            }
+        }
+
+        async function testDeposit() {
+            try {
+                const result = await apiCall('/payments/deposit', 'POST', {
+                    amount: 1000,
+                    paymentMethod: 'card'
+                });
+                updateResult('payment-result', true, 'Deposit successful', result);
+            } catch (error) {
+                updateResult('payment-result', false, error.message);
+            }
+        }
+
+        // Auto-run initial tests
+        window.onload = async function() {
+            await testHealth();
+            await testPackages();
+        };
+    </script>
+</body>
+</html>
