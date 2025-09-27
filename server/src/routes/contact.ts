@@ -1,96 +1,94 @@
-import express from 'express';
-import mongoose from 'mongoose';
+import express, { Request, Response } from 'express';
+import { db } from '../db';
+import { contacts } from '../db/schema';
+import { desc } from 'drizzle-orm';
 
 const router = express.Router();
 
-// Define Contact interface
-interface Contact {
+interface ContactFormData {
   name: string;
   email: string;
   message: string;
-  createdAt: Date;
 }
 
-// Create Contact Schema
-const contactSchema = new mongoose.Schema<Contact>({
-  name: { type: String, required: true },
-  email: { type: String, required: true },
-  message: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now }
-});
+// Simple validation function
+const validateContactForm = (data: any): data is ContactFormData => {
+  return (
+    typeof data.name === 'string' && data.name.trim().length > 0 &&
+    typeof data.email === 'string' && data.email.includes('@') &&
+    typeof data.message === 'string' && data.message.trim().length > 0
+  );
+};
 
-// Create Contact Model
-const Contact = mongoose.model<Contact>('Contact', contactSchema);
-
-// Contact form submission endpoint
-router.post('/submit', async (req: express.Request, res: express.Response) => {
+// Submit contact form
+router.post('/submit', async (req: Request<{}, {}, ContactFormData>, res: Response) => {
   try {
     const { name, email, message } = req.body;
 
-    // Validate required fields
-    if (!name || !email || !message) {
-      return res.status(400).json({ error: 'All fields are required' });
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ error: 'Invalid email format' });
-    }
-
-    // Check if MongoDB is connected
-    if (mongoose.connection.readyState !== 1) {
-      console.log('MongoDB not connected, storing message in memory');
-      // Store in memory as fallback
-      return res.status(200).json({ 
-        message: 'Message received (stored in memory)',
-        data: { name, email, message }
+    // Validate input
+    if (!validateContactForm(req.body)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide valid name, email, and message.'
       });
     }
 
-    // Create new contact document
-    const contact = new Contact({
-      name,
-      email,
-      message
-    });
+    // Insert contact submission into database
+    const [contact] = await db.insert(contacts).values({
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      message: message.trim()
+    }).returning();
 
-    // Save to database
-    await contact.save();
-
-    res.status(200).json({ 
-      message: 'Message received successfully',
-      data: contact
+    res.status(201).json({
+      success: true,
+      message: 'Thank you for your message. We will get back to you soon.',
+      data: { id: contact.id }
     });
   } catch (error) {
-    console.error('Error submitting contact form:', error);
-    res.status(500).json({ 
-      error: 'Failed to submit message',
-      details: error instanceof Error ? error.message : 'Unknown error'
+    console.error('Contact form submission error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to submit contact form. Please try again later.'
     });
   }
 });
 
-// Get all contact messages (admin only)
-router.get('/messages', async (req: express.Request, res: express.Response) => {
+// Get all contact submissions (admin only)
+router.get('/submissions', async (req: Request, res: Response) => {
   try {
-    // Check if MongoDB is connected
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({ 
-        error: 'Database not available',
-        message: 'MongoDB is not connected'
-      });
-    }
+    const submissions = await db.query.contacts.findMany({
+      orderBy: desc(contacts.createdAt)
+    });
 
-    const messages = await Contact.find().sort({ createdAt: -1 });
-    res.status(200).json(messages);
+    res.json({
+      success: true,
+      data: submissions
+    });
+  } catch (error) {
+    console.error('Error fetching contact submissions:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch contact submissions'
+    });
+  }
+});
+
+// Get all contact messages (admin only) - alias for backwards compatibility
+router.get('/messages', async (req: Request, res: Response) => {
+  try {
+    const messages = await db.query.contacts.findMany({
+      orderBy: desc(contacts.createdAt)
+    });
+
+    res.json(messages);
   } catch (error) {
     console.error('Error fetching messages:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to fetch messages',
       details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
 
-export default router; 
+export default router;

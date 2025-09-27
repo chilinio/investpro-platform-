@@ -14,6 +14,85 @@ interface InvestmentWithPackage extends Investment {
 
 const router = Router()
 
+// Get investment stats and daily profits - MUST be before the /:id route
+router.get('/stats', requireAuth, async (req, res) => {
+  try {
+    const userInvestments = await db.query.investments.findMany({
+      where: eq(investments.userId, req.session.userId!),
+      with: {
+        package: true
+      }
+    });
+
+    // Calculate daily profits for each investment
+    const investmentStats = userInvestments.map(inv => {
+      const startDate = new Date(inv.startDate!);
+      const currentDate = new Date();
+      const daysDiff = Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      const dailyRate = inv.package ? Number(inv.package.dailyInterestRate) / 100 : 0;
+      const amount = Number(inv.amount);
+      const dailyProfit = amount * dailyRate;
+      const totalProfit = dailyProfit * Math.max(daysDiff, 0);
+      
+      return {
+        id: inv.id,
+        packageName: inv.package?.name || 'Unknown Package',
+        amount,
+        dailyProfit,
+        totalProfit,
+        daysDiff: Math.max(daysDiff, 0),
+        status: inv.status,
+        dailyRate: dailyRate * 100, // Convert back to percentage for display
+        startDate: inv.startDate
+      };
+    });
+
+    // Generate daily profit signals (mock data for now)
+    const profitSignals = [];
+    const today = new Date();
+    
+    for (let i = 6; i >= 0; i--) {
+      const signalDate = new Date(today);
+      signalDate.setDate(today.getDate() - i);
+      
+      const dailyTotal = investmentStats.reduce((sum, inv) => {
+        if (inv.status === 'active' && new Date(inv.startDate!) <= signalDate) {
+          return sum + inv.dailyProfit;
+        }
+        return sum;
+      }, 0);
+
+      profitSignals.push({
+        date: signalDate.toISOString().split('T')[0],
+        profit: Math.round(dailyTotal * 100) / 100,
+        percentage: dailyTotal > 0 ? '+' + (dailyTotal / 1000 * 100).toFixed(2) + '%' : '0%'
+      });
+    }
+
+    const totalInvestment = investmentStats.reduce((sum, inv) => sum + inv.amount, 0);
+    const totalDailyProfit = investmentStats.reduce((sum, inv) => 
+      inv.status === 'active' ? sum + inv.dailyProfit : sum, 0
+    );
+    const totalProfit = investmentStats.reduce((sum, inv) => sum + inv.totalProfit, 0);
+
+    res.json({
+      summary: {
+        totalInvestment,
+        totalDailyProfit: Math.round(totalDailyProfit * 100) / 100,
+        totalProfit: Math.round(totalProfit * 100) / 100,
+        activeInvestments: investmentStats.filter(inv => inv.status === 'active').length
+      },
+      investmentStats,
+      profitSignals
+    });
+
+  } catch (error) {
+    console.error('Get investment stats error:', error);
+    res.status(500).json({ error: 'Failed to fetch investment stats' });
+  }
+});
+
 // Get all investments for current user
 router.get('/', requireAuth, async (req, res) => {
   try {
@@ -25,25 +104,34 @@ router.get('/', requireAuth, async (req, res) => {
     }) as InvestmentWithPackage[]
 
     const formattedInvestments = userInvestments.map(inv => {
+      const startDate = new Date(inv.startDate!);
+      const currentDate = new Date();
+      const daysDiff = Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      const dailyRate = inv.package ? Number(inv.package.dailyInterestRate) / 100 : 0;
       const amount = Number(inv.amount);
-      const dailyRate = inv.package ? Number(inv.package.dailyInterestRate) : 0;
-      const duration = inv.package ? Number(inv.package.duration) : 0;
-      const dailyReturn = amount * (dailyRate / 100);
-      const totalReturn = dailyReturn * duration;
-
+      const dailyProfit = amount * dailyRate;
+      const totalProfit = dailyProfit * Math.max(daysDiff, 0);
+      
       return {
         id: inv.id,
-        packageName: inv.package ? inv.package.name : '',
+        packageName: inv.package?.name || 'Unknown Package',
         amount,
+        status: inv.status,
         startDate: inv.startDate,
         endDate: inv.endDate,
-        status: inv.status,
-        dailyReturn,
-        totalReturn,
+        dailyReturn: dailyProfit,
+        totalReturn: totalProfit,
+        daysActive: Math.max(daysDiff, 0),
+        package: inv.package ? {
+          name: inv.package.name,
+          dailyInterestRate: inv.package.dailyInterestRate,
+          duration: inv.package.duration
+        } : null
       };
-    });
+    })
 
-    res.json({ investments: formattedInvestments });
+    res.json({ investments: formattedInvestments })
   } catch (error) {
     console.error('Get investments error:', error)
     res.status(500).json({ error: 'Failed to fetch investments' })
@@ -100,24 +188,26 @@ router.post('/', requireAuth, async (req, res) => {
 // Get investment details
 router.get('/:id', requireAuth, async (req, res) => {
   try {
-    const investmentId = Number(req.params.id)
-    console.log('Fetching investment with ID:', req.params.id, 'Parsed:', investmentId)
-    // Validate that the ID is a valid number
+    const investmentId = parseInt(req.params.id);
     if (isNaN(investmentId)) {
-      return res.status(400).json({ error: 'Invalid investment ID' })
+      return res.status(400).json({ error: 'Invalid investment ID' });
     }
+
     const investment = await db.query.investments.findFirst({
       where: eq(investments.id, investmentId),
       with: {
         package: true
       }
     })
+
     if (!investment) {
       return res.status(404).json({ error: 'Investment not found' })
     }
+
     if (investment.userId !== req.session.userId) {
       return res.status(403).json({ error: 'Not authorized' })
     }
+
     res.json({
       id: investment.id,
       amount: investment.amount,
@@ -139,15 +229,8 @@ router.get('/:id', requireAuth, async (req, res) => {
 // Cancel investment
 router.post('/:id/cancel', requireAuth, async (req, res) => {
   try {
-    const investmentId = Number(req.params.id)
-    
-    // Validate that the ID is a valid number
-    if (isNaN(investmentId)) {
-      return res.status(400).json({ error: 'Invalid investment ID' })
-    }
-
     const investment = await db.query.investments.findFirst({
-      where: eq(investments.id, investmentId)
+      where: eq(investments.id, Number(req.params.id))
     })
 
     if (!investment) {
@@ -224,16 +307,5 @@ router.post('/calculate', requireAuth, async (req, res) => {
   }
 })
 
-// Add a dummy stats route to prevent 400 errors
-router.get('/stats', requireAuth, async (req, res) => {
-  // Return dummy stats for now
-  res.json({
-    totalInvestment: 0,
-    activeInvestments: 0,
-    totalReturns: 0,
-    monthlyReturns: [],
-    investmentDistribution: []
-  });
-});
 
 export default router 

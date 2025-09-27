@@ -20,13 +20,18 @@ router.post('/login', async (req, res) => {
     }
 
     req.session.userId = user.id;
-    await req.session.save();
+    req.session.user = {
+      email: user.email
+    };
 
     res.json({
-      id: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email
+      user: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email
+      },
+      token: 'session-based-auth' // Since we're using sessions, not JWT
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -99,13 +104,18 @@ router.post('/register', async (req, res) => {
 
     // Set session
     req.session.userId = newUser.id;
-    await req.session.save()
+    req.session.user = {
+      email: newUser.email
+    };
 
     res.status(201).json({
-      id: newUser.id,
-      firstName: newUser.firstName,
-      lastName: newUser.lastName,
-      email: newUser.email
+      user: {
+        id: newUser.id,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        email: newUser.email
+      },
+      token: 'session-based-auth' // Since we're using sessions, not JWT
     })
   } catch (error) {
     console.error('Registration error:', error)

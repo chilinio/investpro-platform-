@@ -2,10 +2,14 @@ import express from 'express';
 import cors from 'cors';
 import session from 'express-session';
 import dotenv from 'dotenv';
-import authRouter from './routes/auth'; // Import the auth router
+import authRouter from './routes/auth';
 import investmentRouter from './routes/investments';
 import contactRoutes from './routes/contact';
+import adminRouter from './routes/admin';
+import notificationsRouter from './routes/notifications';
+import paymentsRouter from './routes/payments';
 import { errorHandler } from './middleware/errorHandler';
+import { apiLimiter, authLimiter, paymentLimiter, investmentLimiter, contactLimiter } from './middleware/rateLimiter';
 import helmet from 'helmet';
 import { db } from './db';
 import { investmentPackages } from './db/schema';
@@ -54,6 +58,9 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Apply general rate limiting to all API routes
+app.use('/api', apiLimiter);
+
 // Session middleware
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key',
@@ -74,8 +81,12 @@ const requireAuth = (req: express.Request, res: express.Response, next: express.
   next();
 };
 
-// Routes
-app.use('/api/auth', authRouter); // Use the auth router
+// Routes with specific rate limiting
+app.use('/api/auth', authLimiter, authRouter);
+app.use('/api/contact', contactLimiter, contactRoutes);
+app.use('/api/admin', adminRouter);
+app.use('/api/notifications', notificationsRouter);
+app.use('/api/payments', paymentLimiter, paymentsRouter);
 
 // Public packages route (no authentication required)
 app.get('/api/investments/packages', async (req, res) => {
@@ -98,12 +109,22 @@ app.get('/api/investments/packages', async (req, res) => {
   }
 });
 
-app.use('/api/investments', requireAuth, investmentRouter);
-app.use('/api/contact', contactRoutes);
+app.use('/api/investments', investmentLimiter, requireAuth, investmentRouter);
 
 // Root route
 app.get('/', (req, res) => {
   res.redirect('/api/health');
+});
+
+// Favicon route to prevent 404s
+app.get('/favicon.ico', (req, res) => {
+  res.status(204).end();
+});
+
+// Robots.txt route
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain');
+  res.send('User-agent: *\nDisallow: /api/\nAllow: /');
 });
 
 app.get('/api/health', async (req, res) => {
@@ -152,6 +173,15 @@ app.get('/api/packages', (req, res) => {
       description: 'Premium investment opportunity'
     }
   ]);
+});
+
+// Catch-all route for undefined endpoints
+app.use('*', (req, res) => {
+  res.status(404).json({ 
+    error: 'Endpoint not found',
+    path: req.originalUrl,
+    method: req.method 
+  });
 });
 
 // Error handling middleware (should be last)

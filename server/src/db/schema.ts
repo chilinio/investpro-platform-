@@ -45,6 +45,14 @@ export const transactions = pgTable('transactions', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
 })
 
+export const contacts = pgTable('contacts', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  email: varchar('email', { length: 255 }).notNull(),
+  message: text('message').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow()
+})
+
 // Define relations
 export const usersRelations = relations(users, ({ many }) => ({
   investments: many(investments),

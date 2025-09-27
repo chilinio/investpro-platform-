@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>InvestPro Deployment Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>InvestPro Deployment Test</h1>
+    
+    <div class="test-section info">
+        <h3>🔍 Environment Check</h3>
+        <p>Testing if the backend is properly configured and accessible.</p>
+        <button onclick="testHealth()">Test Health Endpoint</button>
+        <button onclick="testDatabase()">Test Database Connection</button>
+        <div id="env-results"></div>
+    </div>
+
+    <div class="test-section info">
+        <h3>🔐 Authentication Test</h3>
+        <p>Testing registration and login functionality.</p>
+        <button onclick="testRegistration()">Test Registration</button>
+        <button onclick="testLogin()">Test Login</button>
+        <div id="auth-results"></div>
+    </div>
+
+    <div class="test-section info">
+        <h3>📊 API Endpoints Test</h3>
+        <p>Testing all available API endpoints.</p>
+        <button onclick="testAllEndpoints()">Test All Endpoints</button>
+        <div id="api-results"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://invest-k79xgdhaq-paddys-projects-0a00fd55.vercel.app/api';
+        
+        function logResult(containerId, message, isSuccess = true) {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = isSuccess ? 'success' : 'error';
+            div.innerHTML = `<pre>${new Date().toLocaleTimeString()}: ${message}</pre>`;
+            container.appendChild(div);
+        }
+
+        async function testHealth() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                logResult('env-results', `✅ Health Check: ${JSON.stringify(data)}`);
+            } catch (error) {
+                logResult('env-results', `❌ Health Check Failed: ${error.message}`, false);
+            }
+        }
+
+        async function testDatabase() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        firstName: 'Test',
+                        lastName: 'User',
+                        email: 'test' + Date.now() + '@example.com',
+                        password: 'password123'
+                    })
+                });
+                
+                if (response.status === 500) {
+                    const errorData = await response.json();
+                    logResult('env-results', `❌ Database Error: ${errorData.error}`, false);
+                } else {
+                    logResult('env-results', `✅ Database Connection: Status ${response.status}`);
+                }
+            } catch (error) {
+                logResult('env-results', `❌ Database Test Failed: ${error.message}`, false);
+            }
+        }
+
+        async function testRegistration() {
+            try {
+                const testEmail = 'test' + Date.now() + '@example.com';
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        firstName: 'Test',
+                        lastName: 'User',
+                        email: testEmail,
+                        password: 'password123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    logResult('auth-results', `✅ Registration Success: ${JSON.stringify(data)}`);
+                    // Store for login test
+                    localStorage.setItem('testUser', JSON.stringify({ email: testEmail, password: 'password123' }));
+                } else {
+                    logResult('auth-results', `❌ Registration Failed: ${data.error}`, false);
+                }
+            } catch (error) {
+                logResult('auth-results', `❌ Registration Error: ${error.message}`, false);
+            }
+        }
+
+        async function testLogin() {
+            try {
+                const testUser = JSON.parse(localStorage.getItem('testUser') || '{}');
+                if (!testUser.email) {
+                    logResult('auth-results', '❌ No test user available. Run registration first.', false);
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: testUser.email,
+                        password: testUser.password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    logResult('auth-results', `✅ Login Success: ${JSON.stringify(data)}`);
+                    localStorage.setItem('testToken', data.token);
+                } else {
+                    logResult('auth-results', `❌ Login Failed: ${data.error}`, false);
+                }
+            } catch (error) {
+                logResult('auth-results', `❌ Login Error: ${error.message}`, false);
+            }
+        }
+
+        async function testAllEndpoints() {
+            const endpoints = [
+                { name: 'Health', url: '/health', method: 'GET' },
+                { name: 'Investment Packages', url: '/investments/packages', method: 'GET' }
+            ];
+
+            for (const endpoint of endpoints) {
+                try {
+                    const response = await fetch(`${API_BASE}${endpoint.url}`, {
+                        method: endpoint.method,
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        logResult('api-results', `✅ ${endpoint.name}: ${JSON.stringify(data)}`);
+                    } else {
+                        logResult('api-results', `❌ ${endpoint.name}: ${data.error}`, false);
+                    }
+                } catch (error) {
+                    logResult('api-results', `❌ ${endpoint.name} Error: ${error.message}`, false);
+                }
+            }
+        }
+    </script>
+</body>
+</html> 

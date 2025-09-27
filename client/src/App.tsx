@@ -9,6 +9,8 @@ import InvestmentPackages from './components/InvestmentPackages';
 import NotificationToast from './components/NotificationToast';
 import Footer from './components/Footer';
 import Payment from './pages/Payment';
+import LandingPage from './pages/LandingPage';
+import Contact from './pages/Contact';
 
 // Protected Route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -32,6 +34,11 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 // Navigation component
 const Navigation: React.FC = () => {
   const { user, logout } = useAuth();
+  
+  // Don't show navigation on landing page for unauthenticated users
+  if (!user && window.location.pathname === '/') {
+    return null;
+  }
 
   return (
     <nav className="bg-white shadow-md">
@@ -94,40 +101,50 @@ const Navigation: React.FC = () => {
   );
 };
 
+const AppContent: React.FC = () => {
+  const { user } = useAuth();
+  const isLandingPage = window.location.pathname === '/' && !user;
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <Navigation />
+      <main className={isLandingPage ? '' : 'max-w-7xl mx-auto py-6 sm:px-6 lg:px-8'}>
+        <Routes>
+          <Route path="/login" element={<LoginForm />} />
+          <Route path="/register" element={<RegisterForm />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/packages"
+            element={
+              <ProtectedRoute>
+                <InvestmentPackages />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/payment" element={<Payment />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/" element={<LandingPage />} />
+        </Routes>
+      </main>
+      {!isLandingPage && <Footer />}
+      <NotificationToast />
+    </div>
+  );
+};
+
 const App: React.FC = () => {
   return (
     <Router>
       <NotificationProvider>
         <AuthProvider>
-          <div className="min-h-screen bg-gray-100">
-            <Navigation />
-            <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-              <Routes>
-                <Route path="/login" element={<LoginForm />} />
-                <Route path="/register" element={<RegisterForm />} />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/packages"
-                  element={
-                    <ProtectedRoute>
-                      <InvestmentPackages />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="/payment" element={<Payment />} />
-                <Route path="/" element={<Navigate to="/dashboard" />} />
-              </Routes>
-            </main>
-            <Footer />
-            <NotificationToast />
-          </div>
+          <AppContent />
         </AuthProvider>
       </NotificationProvider>
     </Router>
