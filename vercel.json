@@ -13,7 +13,8 @@
       "src": "server/src/index.ts",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["server/src/**"]
+        "includeFiles": ["server/src/**"],
+        "maxLambdaSize": "50mb"
       }
     }
   ],
@@ -29,10 +30,5 @@
   ],
   "env": {
     "NODE_ENV": "production"
-  },
-  "functions": {
-    "server/src/index.ts": {
-      "maxDuration": 30
-    }
   }
 }
