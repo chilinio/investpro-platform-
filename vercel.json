@@ -1,48 +1,10 @@
 {
-  "version": 2,
-  "name": "investpro",
-  "builds": [
-    {
-      "src": "client/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    },
-    {
-      "src": "server/src/index.ts",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["server/src/**"],
-        "maxLambdaSize": "50mb"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/server/src/index.ts"
-    },
-    {
-      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
-      "dest": "/client/dist/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/client/dist/index.html"
-    }
-  ],
+  "buildCommand": "cd client && npm install && npm run build",
+  "outputDirectory": "client/dist",
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/server/src/index.ts"
-    },
-    {
-      "source": "/((?!api).*)",
-      "destination": "/client/dist/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 }
