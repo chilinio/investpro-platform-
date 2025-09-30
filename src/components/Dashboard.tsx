@@ -63,15 +63,50 @@ const Dashboard: React.FC = () => {
 
   const fetchInvestments = useCallback(async () => {
     try {
-      const response = await api.get('/investments');
-      const data = response.data;
-      const investmentsArray = data.investments || [];
-      setInvestments(investmentsArray);
+      // Mock investments data
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const mockInvestments: Investment[] = [
+        {
+          id: '1',
+          packageName: 'Starter Package',
+          amount: 1000,
+          startDate: '2024-01-15',
+          endDate: '2024-02-14',
+          status: 'active',
+          dailyReturn: 20,
+          totalReturn: 600,
+          daysActive: 30,
+          package: {
+            name: 'Starter Package',
+            dailyInterestRate: '2%',
+            duration: 30
+          }
+        },
+        {
+          id: '2',
+          packageName: 'Growth Package',
+          amount: 2500,
+          startDate: '2024-01-01',
+          endDate: '2024-03-01',
+          status: 'active',
+          dailyReturn: 87.5,
+          totalReturn: 2625,
+          daysActive: 45,
+          package: {
+            name: 'Growth Package',
+            dailyInterestRate: '3.5%',
+            duration: 60
+          }
+        }
+      ];
+      
+      setInvestments(mockInvestments);
       
       // Calculate basic stats
-      const totalInvestment = investmentsArray.reduce((sum: number, inv: Investment) => sum + inv.amount, 0);
-      const activeInvestments = investmentsArray.filter((inv: Investment) => inv.status === 'active').length;
-      const totalReturns = investmentsArray.reduce((sum: number, inv: Investment) => sum + inv.totalReturn, 0);
+      const totalInvestment = mockInvestments.reduce((sum, inv) => sum + inv.amount, 0);
+      const activeInvestments = mockInvestments.filter(inv => inv.status === 'active').length;
+      const totalReturns = mockInvestments.reduce((sum, inv) => sum + inv.totalReturn, 0);
       
       setStats({
         totalInvestment,
@@ -91,24 +126,57 @@ const Dashboard: React.FC = () => {
 
   const fetchProfitStats = useCallback(async () => {
     try {
-      const response = await api.get('/investments/stats');
-      const data = response.data;
+      // Mock profit stats data
+      await new Promise(resolve => setTimeout(resolve, 300));
       
-      if (data.summary) {
-        setStats(prev => ({
-          ...prev,
-          totalDailyProfit: data.summary.totalDailyProfit,
-          totalProfit: data.summary.totalProfit
-        }));
-      }
+      const mockData = {
+        summary: {
+          totalDailyProfit: 107.5,
+          totalProfit: 3225
+        },
+        profitSignals: [
+          { date: '2024-01-01', profit: 87.5, percentage: '3.5%' },
+          { date: '2024-01-02', profit: 95.2, percentage: '3.8%' },
+          { date: '2024-01-03', profit: 78.3, percentage: '3.1%' },
+          { date: '2024-01-04', profit: 102.1, percentage: '4.1%' },
+          { date: '2024-01-05', profit: 89.7, percentage: '3.6%' },
+          { date: '2024-01-06', profit: 115.3, percentage: '4.6%' },
+          { date: '2024-01-07', profit: 93.8, percentage: '3.8%' }
+        ],
+        investmentStats: [
+          {
+            id: 1,
+            packageName: 'Starter Package',
+            amount: 1000,
+            dailyProfit: 20,
+            totalProfit: 600,
+            daysDiff: 30,
+            status: 'active',
+            dailyRate: 0.02,
+            startDate: '2024-01-15'
+          },
+          {
+            id: 2,
+            packageName: 'Growth Package', 
+            amount: 2500,
+            dailyProfit: 87.5,
+            totalProfit: 2625,
+            daysDiff: 45,
+            status: 'active',
+            dailyRate: 0.035,
+            startDate: '2024-01-01'
+          }
+        ]
+      };
       
-      if (data.profitSignals) {
-        setProfitSignals(data.profitSignals);
-      }
+      setStats(prev => ({
+        ...prev,
+        totalDailyProfit: mockData.summary.totalDailyProfit,
+        totalProfit: mockData.summary.totalProfit
+      }));
       
-      if (data.investmentStats) {
-        setInvestmentStats(data.investmentStats);
-      }
+      setProfitSignals(mockData.profitSignals);
+      setInvestmentStats(mockData.investmentStats);
     } catch (err) {
       console.error('Error fetching profit stats:', err);
     }

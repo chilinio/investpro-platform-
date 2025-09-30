@@ -40,8 +40,52 @@ const InvestmentStats: React.FC = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await api.get('/investments/stats');
-        setStats(response.data);
+        // Mock investment stats data
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        const mockStats: StatsResponse = {
+          summary: {
+            totalInvestment: 3500,
+            totalDailyProfit: 107.5,
+            totalProfit: 3225,
+            activeInvestments: 2
+          },
+          investmentStats: [
+            {
+              id: 1,
+              packageName: 'Starter Package',
+              amount: 1000,
+              dailyProfit: 20,
+              totalProfit: 600,
+              daysDiff: 30,
+              status: 'active',
+              dailyRate: 0.02,
+              startDate: '2024-01-15'
+            },
+            {
+              id: 2,
+              packageName: 'Growth Package',
+              amount: 2500,
+              dailyProfit: 87.5,
+              totalProfit: 2625,
+              daysDiff: 45,
+              status: 'active',
+              dailyRate: 0.035,
+              startDate: '2024-01-01'
+            }
+          ],
+          profitSignals: [
+            { date: '2024-01-01', profit: 87.5, percentage: '3.5%' },
+            { date: '2024-01-02', profit: 95.2, percentage: '3.8%' },
+            { date: '2024-01-03', profit: 78.3, percentage: '3.1%' },
+            { date: '2024-01-04', profit: 102.1, percentage: '4.1%' },
+            { date: '2024-01-05', profit: 89.7, percentage: '3.6%' },
+            { date: '2024-01-06', profit: 115.3, percentage: '4.6%' },
+            { date: '2024-01-07', profit: 93.8, percentage: '3.8%' }
+          ]
+        };
+        
+        setStats(mockStats);
         setError(null);
       } catch (err) {
         setError('Failed to fetch investment statistics. Please try again later.');

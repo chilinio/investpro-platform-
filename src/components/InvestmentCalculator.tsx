@@ -34,7 +34,10 @@ const InvestmentCalculator: React.FC = () => {
     setLoading(true);
     
     try {
-      const response = await fetch('/api/investments/calculate', {
+      // Mock investment calculation
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const mockResponse = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

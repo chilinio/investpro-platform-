@@ -46,8 +46,45 @@ const InvestmentPackages: React.FC = () => {
 
   const fetchPackages = useCallback(async () => {
     try {
-      const response = await api.get('/investments/packages');
-      setPackages(response.data.packages);
+      // Mock investment packages data
+      await new Promise(resolve => setTimeout(resolve, 600));
+      
+      const mockPackages: Package[] = [
+        {
+          id: '1',
+          name: 'Starter Package',
+          minInvestment: 100,
+          dailyReturn: 0.02,
+          duration: 30,
+          description: 'Perfect for beginners looking to start their investment journey'
+        },
+        {
+          id: '2', 
+          name: 'Growth Package',
+          minInvestment: 500,
+          dailyReturn: 0.035,
+          duration: 60,
+          description: 'Balanced growth opportunity for moderate investors'
+        },
+        {
+          id: '3',
+          name: 'Premium Package',
+          minInvestment: 1000,
+          dailyReturn: 0.05,
+          duration: 90,
+          description: 'High-yield investment for experienced investors'
+        },
+        {
+          id: '4',
+          name: 'Elite Package',
+          minInvestment: 5000,
+          dailyReturn: 0.075,
+          duration: 120,
+          description: 'Exclusive package for high-net-worth individuals'
+        }
+      ];
+      
+      setPackages(mockPackages);
       setError(null);
     } catch (err) {
       setError('Failed to fetch investment packages. Please try again later.');
@@ -68,11 +105,14 @@ const InvestmentPackages: React.FC = () => {
 
   const onSubmit = async (formData: InvestmentFormData) => {
     try {
-      const response = await api.post('/investments', {
+      // Mock investment creation
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log('Investment creation (mock):', {
         packageId: parseInt(formData.packageId),
-        amount: parseFloat(formData.amount)
+        amount: parseFloat(formData.amount),
+        packageName: selectedPackage?.name
       });
-      console.log('Investment creation response:', response.data);
       addNotification({
         type: 'success',
         message: 'Investment created successfully!',
