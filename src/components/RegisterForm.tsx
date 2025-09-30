@@ -48,16 +48,22 @@ const RegisterForm: React.FC = () => {
     try {
       console.log('Submitting registration data:', formData);
       
-      const response = await api.post('/auth/register', {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        password: formData.password,
-      });
+      // Mock successful registration for demo
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      console.log('Registration response:', response.data);
+      const mockResponse = {
+        user: {
+          id: Date.now(),
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email
+        },
+        token: 'demo-token'
+      };
       
-      const { user, token } = response.data;
+      console.log('Registration response:', mockResponse);
+      
+      const { user, token } = mockResponse;
       
       // Store the token
       localStorage.setItem('token', token);
@@ -80,11 +86,10 @@ const RegisterForm: React.FC = () => {
       navigate('/dashboard');
     } catch (err: any) {
       console.error('Registration error:', err);
-      console.error('Error response:', err.response?.data);
       
       addNotification({
         type: 'error',
-        message: err.response?.data?.error || 'Registration failed. Please try again.',
+        message: 'Registration failed. Please try again.',
       });
     }
   };

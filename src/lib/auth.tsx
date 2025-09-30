@@ -31,13 +31,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is logged in
+    // Check if user is logged in (mock)
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/auth/user');
-        if (response.ok) {
-          const userData = await response.json();
-          setUser(userData);
+        // Check localStorage for demo token
+        const token = localStorage.getItem('token');
+        if (token === 'demo-token') {
+          setUser({
+            id: '1',
+            email: 'demo@example.com',
+            name: 'Demo User'
+          });
         }
       } catch (error) {
         console.error('Auth check failed:', error);
@@ -51,19 +55,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Login failed');
-      }
-
-      const userData = await response.json();
+      // Mock successful login for demo
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const userData = {
+        id: Date.now().toString(),
+        email: email,
+        name: 'Demo User'
+      };
+      
       setUser(userData);
       // Navigation is now handled by the components
     } catch (error) {
@@ -74,7 +74,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      // Mock logout
+      localStorage.removeItem('token');
       setUser(null);
       navigate('/');
     } catch (error) {

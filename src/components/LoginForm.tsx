@@ -31,8 +31,20 @@ const LoginForm: React.FC = () => {
 
   const onSubmit = async (formData: LoginFormData) => {
     try {
-      const response = await api.post('/auth/login', formData);
-      const { user, token } = response.data;
+      // Mock successful login for demo
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const mockResponse = {
+        user: {
+          id: Date.now(),
+          firstName: 'Demo',
+          lastName: 'User',
+          email: formData.email
+        },
+        token: 'demo-token'
+      };
+      
+      const { user, token } = mockResponse;
       
       // Store the token
       localStorage.setItem('token', token);
