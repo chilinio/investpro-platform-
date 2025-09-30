@@ -35,27 +35,24 @@ const SignUp: React.FC = () => {
     }
 
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // Mock successful registration for demo
+      console.log('Submitting registration data:', formData);
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const userData = {
+        user: {
+          id: Date.now(),
           firstName: formData.firstName,
           lastName: formData.lastName,
-          email: formData.email,
-          password: formData.password,
-        }),
-      })
-
-      if (!response.ok) {
-        console.error('Registration failed with status:', response.status, response.statusText);
-        throw new Error('Registration failed');
-      }
-
-      const userData = await response.json();
-      console.log('User data after registration:', userData);
-      setUser(userData);
+          email: formData.email
+        },
+        token: 'demo-token'
+      };
+      
+      console.log('Registration successful:', userData);
+      setUser(userData.user);
       setShowCalculator(true);
     } catch (err) {
       console.error('Registration error details:', err);

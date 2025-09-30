@@ -53,23 +53,51 @@ export interface InvestmentPackage {
 
 export const auth = {
   login: async (email: string, password: string) => {
-    const { data } = await api.post('/auth/login', { email, password });
-    return data;
+    // Mock successful login for demo
+    return {
+      user: { email, firstName: 'Demo', lastName: 'User' },
+      token: 'demo-token'
+    };
   },
   logout: async () => {
-    const { data } = await api.post('/auth/logout');
-    return data;
+    return { success: true };
   },
   getCurrentUser: async () => {
-    const { data } = await api.get<User | null>('/auth/user');
-    return data;
+    return { email: 'demo@example.com' };
   }
 };
 
 export const packages = {
   getAll: async () => {
-    const { data } = await api.get<InvestmentPackage[]>('/investments/packages');
-    return data;
+    // Mock investment packages for demo
+    return {
+      packages: [
+        {
+          id: 1,
+          name: "Starter Package",
+          minInvestment: 100,
+          dailyReturn: 0.02,
+          duration: 30,
+          description: "Perfect for beginners"
+        },
+        {
+          id: 2,
+          name: "Growth Package", 
+          minInvestment: 500,
+          dailyReturn: 0.035,
+          duration: 60,
+          description: "Balanced growth opportunity"
+        },
+        {
+          id: 3,
+          name: "Premium Package",
+          minInvestment: 1000,
+          dailyReturn: 0.05,
+          duration: 90,
+          description: "High-yield investment"
+        }
+      ]
+    };
   }
 };
 
